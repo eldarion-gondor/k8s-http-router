@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -eo pipefail
+
+[[ $DEBUG ]] && set -x
+
+export ETCD="http://etcd.default:2379"
+export ETCD_PATH=${ETCD_PATH:-/gondor/router}
+export ETCD_TTL=${ETCD_TTL:-20}
+
+# wait for etcd to be available
+until etcdctl --no-sync -C $ETCD ls >/dev/null 2>&1; do
+    echo "router: waiting for etcd at $ETCD..."
+    sleep $(($ETCD_TTL/2))  # sleep for half the TTL
+done
+
+# wait until etcd has discarded potentially stale values
+sleep $(($ETCD_TTL+1))
+
+function etcd_set_default {
+  set +e
+  etcdctl --no-sync -C $ETCD mk $ETCD_PATH/$1 $2 >/dev/null 2>&1
+  if [[ $? -ne 0 && $? -ne 4 ]]; then
+    echo "etcd_set_default: an etcd error occurred. aborting..."
+    exit 1
+  fi
+  set -e
+}
+
+mkdir -p /etc/router
+etcdctl --no-sync -C $ETCD get $ETCD_PATH/tls/certificate > /etc/router/tls.crt
+etcdctl --no-sync -C $ETCD get $ETCD_PATH/tls/key > /etc/router/tls.key
+chmod 0600 /etc/router/tls.{crt,key}
+
+/app/bin/router &
+SERVICE_PID=$!
+
+# smart shutdown on SIGINT and SIGTERM
+function on_exit() {
+    kill -TERM $SERVICE_PID
+    wait $SERVICE_PID 2>/dev/null
+    exit 0
+}
+trap on_exit INT TERM
+
+# wait for the service to become available
+sleep 1 && while [[ -z $(netstat -lnt | awk "\$6 == \"LISTEN\" && \$4 ~ \".80\" && \$1 ~ \"tcp.?\"") ]] ; do sleep 1; done
+
+echo "router: up and running..."
+
+wait
