@@ -23,7 +23,7 @@ To get k8s-http-router running on your Kubernetes cluster you can use the follow
             spec:
               containers:
                 - name: router
-                  image: <todo>
+                  image: quay.io/eldarion/k8s-http-router
                   ports:
                     - name: router-http
                       containerPort: 80
