@@ -1,6 +1,6 @@
 # k8s-http-router
 
-> Warning: this project is very new and might have some issues. We have been using it successfully in our testing clusters for a couple of months. Bug reports are welcome!
+> Warning: this project is very new and might have some issues. We have been using it successfully in our testing clusters for a couple of months. Bug reports are welcome!g
 
 This project has been pulled from the new Gondor backend built on Kubernetes. It simply routes HTTP requests to Kubernetes services using the HTTP Host header. Additional configuration can be specified, but nothing else is currently supported.
 
@@ -66,3 +66,9 @@ To add a service to route, use the `router` annotation:
                   targetPort: 8000
 
 k8s-http-router will watch for service changes and keep its internal data structures up-to-date with changes in the Kubernetes service objects.
+
+# Credit
+
+Thanks to Google for the amazing [Kubernetes](https://github.com/GoogleCloudPlatform/kubernetes) project.
+
+Thanks to the [flynn](https://github.com/flynn/flynn) project for a great router design this is inspired by, but stripped down and modified for Kubernetes.
