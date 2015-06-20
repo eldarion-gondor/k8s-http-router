@@ -1,5 +1,7 @@
 # k8s-http-router
 
+> Warning: this project is very new and might have some issues. We have been using it successfully in our testing clusters for a couple of months. Bug reports are welcome!
+
 This project has been pulled from the new Gondor backend built on Kubernetes. It simply routes HTTP requests to Kubernetes services using the HTTP Host header. Additional configuration can be specified, but nothing else is currently supported.
 
 # Setup
